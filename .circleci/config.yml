@@ -144,8 +144,8 @@ jobs:
             aws cloudformation deploy \
               --template-file .circleci/files/backend.yml \
               --tags project=udapeople \
-              --stack-name "udapeople-backend-<<pipeline.parameters.workflow_id>> \
-              --parameter-overrides ID="<<pipeline.parameters.workflow_id>>"
+              --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"
 
       - run:
           name: Ensure front-end infrastructure exist
@@ -153,13 +153,13 @@ jobs:
             aws cloudformation deploy \
               --template-file .circleci/files/frontend.yml \
               --tags project=udapeople \
-              --stack-name "udapeople-frontend-"<<pipeline.parameters.workflow_id>>" \
+              --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --parameter-overrides ID="<<pipeline.parameters.workflow_id>>"
       - run:
           name: Add back-end ip to ansible inventory
           command: |
             aws ec2 describe-instances \
-              --fiter Name=tag, Values=backend-<< pipeline.parameters.workflow_id >> \
+              --fiter Name=tag, Values=backend-${CIRCLE_WORKFLOW_ID:0:7} \
               --query 'Reservation[*].Instances[*].PublicIpAddress' \
               --output text | cat >> /circleci/ansible/invetory.txt
       - persist_to_workspace:
@@ -313,12 +313,12 @@ workflows:
       - scan-frontend:
           requires: [build-frontend]
       - deploy-infrastructure:
-          requires: 
+          requires:
             - scan-frontend
             - scan-backend
           filters:
             branches:
-              only: 
+              only:
                 - master
       # - configure-infrastructure:
       #     requires: [deploy-infrastructure]
