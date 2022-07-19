@@ -136,7 +136,6 @@ jobs:
   deploy-infrastructure:
     docker:
       - image: amazon/aws-cli
-        docker_layer_caching: true
     steps:
       - checkout
       - run:
@@ -167,7 +166,7 @@ jobs:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
-      - destroy-environment-on-fail
+      - destroy-environment
   # configure-infrastructure:
   #   docker:
   #     # Docker image here that supports Ansible
