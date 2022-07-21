@@ -162,9 +162,9 @@ jobs:
               --filters Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7} \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --output text | cat >> .circleci/ansible/inventory.txt
-      
+
       - run: yum -y install tar gzip
-      
+
       - persist_to_workspace:
           root: ~/
           paths:
@@ -177,7 +177,7 @@ jobs:
       - checkout
       - add_ssh_keys:
           fingerprints:
-            - "ce:97:3f:88:0a:0d:c6:4b:93:98:03:bd:01:80:94:6e:3c:d7:07:9a"
+            ["ce:97:3f:88:0a:0d:c6:4b:93:98:03:bd:01:80:94:6e:3c:d7:07:9a"]
       - attach_workspace:
           at: ~/
       - run:
