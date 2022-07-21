@@ -172,7 +172,7 @@ jobs:
       - destroy-environment
   configure-infrastructure:
     docker:
-      - image: python:3.8.13-node
+      - image: cimg/python:3.8.13
     steps:
       - checkout
       - add_ssh_keys:
@@ -190,7 +190,7 @@ jobs:
           name: Configure server
           command: |
             cd .circleci/ansible
-            ansible-playbook  -i inventory.txt configure-server.yml
+            ansible-playbook -i inventory.txt configure-server.yml
       - destroy-environment
 
   # run-migrations:
