@@ -1,0 +1,52 @@
+---
+
+- name: Make directory
+  become: true
+  file:
+    path: /home/ubuntu/backend
+    state: directory
+
+- name: Copy files
+  become: true
+  unarchive:
+    src: ../../artifact.tar.gz
+    dest: /home/ubuntu/backend
+
+- name: Project files
+  become: true
+  shell: ls /home/ubuntu/backend
+  args:
+    executable: /bin/bash
+  register: after_unarchiving
+
+- name: npm install
+  become: true
+  shell: |
+    echo ${USER}
+    cd /home/ubuntu/backend
+    npm install
+  args:
+    executable: /bin/bash
+  register: start_app_results
+
+- name: pm2 start
+  shell: |
+    echo ${USER}
+    cd /home/ubuntu/backend
+    pm2 start npm -- start
+  args:
+    executable: /bin/bash
+  register: pm2_start_results
+
+- name: Results after unarchiving
+  debug:
+    msg: "{{ after_unarchiving.stdout_lines }}"
+
+- name: Show results npm installs
+  debug:
+    msg: "{{ start_app_results.stdout_lines }}"
+
+- name: Show results after app pm2 starts
+  debug:
+    msg: "{{ pm2_start_results.stdout_lines }}"
+  
