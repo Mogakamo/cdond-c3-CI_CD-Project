@@ -199,17 +199,12 @@ jobs:
             npm install 
             npm run migrations > migrations_dump.txt
       - run:
-          name: Send migration results to memstash
+          name: Send migration results to kvdb
           command: |
             if grep -q "has been executed successfully."
             then
               # kvdb.io
               curl https://kvdb.io/Cn38wMVvuo7cQwF4Mp1unv/migration_${CIRCLE_WORKFLOW_ID:0:7}  -D '1'
-            elif grep -q "No migrations are pending" 
-              curl https://kvdb.io/Cn38wMVvuo7cQwF4Mp1unv/migration_${CIRCLE_WORKFLOW_ID:0:7}  -D '1'
-
-            else
-              exit 1
             fi
 
       - persist_to_workspace:
