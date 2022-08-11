@@ -224,13 +224,21 @@ jobs:
 
   deploy-frontend:
     docker:
-      - image: cimg/python:3.8.13
+      - image: python:3.10.5-alpine3.16
     steps:
       - checkout
+      - restore_cache: frontend-build
+      - run: 
+          name: Install node and npm dependencies
+          command: apk add --update nodejs npm 
       - run:
-          name: Install AWSCLI
+          name: Install AWSCLI and Curl
           command: |
-            pip3 install awscli
+            pip install awscli
+            apk add --update curl
+            aws --version
+      - attach_workspace:
+          at: ~/
       - run:
           name: Get backend url
           command: |
@@ -259,9 +267,11 @@ jobs:
 
   deploy-backend:
     docker:
-      - image: cimg/python:3.8.13-node
+      - image: python:3.10.5-alpine3.16
     steps:
       - checkout
+      - restore_cache:
+          key: backend-build
       - add_ssh_keys:
           fingerprints: ["a5:8c:b2:00:fb:75:d2:7d:0e:aa:4c:c0:cb:74:5c:0d"]
       - attach_workspace:
@@ -269,8 +279,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            pip3 install awscli
-            pip3 install ansible
+            apk add --update --no-cache tar gzip nodejs npm aws-cli curl ansible
       - run:
           name: Deploy backend
           command: |
@@ -281,6 +290,8 @@ jobs:
             npm run build
             cd ..
             tar -C backend -czvf artifact.tar.gz .
+            mkdir -p ~/project/.circleci/ansible/roles/deploy/files/
+            mv artifact.tar.gz .circleci/ansible/roles/deploy/files/artifact.tar.gz
             cd .circleci/ansible
             echo "Contents of the inventory.txt file is -----"
             cat inventory.txt
