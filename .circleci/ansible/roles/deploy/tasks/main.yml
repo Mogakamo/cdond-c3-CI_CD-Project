@@ -1,52 +1,54 @@
 ---
+- name: "update apt packages."
+  become: yes
+  apt:
+    update_cache: yes
 
-- name: Make directory
-  become: true
-  file:
-    path: /home/ubuntu/backend
-    state: directory
+- name: "upgrade packages"
+  become: yes
+  apt:
+    upgrade: yes
 
-- name: Copy files
-  become: true
+- name: remove unneeded deps
+  become: yes
+  apt:
+    autoremove: yes
+
+- name: install deps
+  become: yes
+  apt:
+    name: ['nodejs', 'npm']
+    state: latest
+    update_cache: yes
+
+- name: install pm2
+  become: yes
+  npm:
+    name: pm2
+    global: yes
+    state: latest
+    production: yes
+
+- name: extract artifact
+  become: yes
   unarchive:
-    src: ../../artifact.tar.gz
-    dest: /home/ubuntu/backend
+    src: files/artifact.tar.gz
+    dest: .
 
-- name: Project files
-  become: true
-  shell: ls /home/ubuntu/backend
-  args:
-    executable: /bin/bash
-  register: after_unarchiving
-
-- name: npm install
-  become: true
+- name: start app
+  become: yes
   shell: |
-    echo ${USER}
-    cd /home/ubuntu/backend
     npm install
-  args:
-    executable: /bin/bash
-  register: start_app_results
-
-- name: pm2 start
-  shell: |
-    echo ${USER}
-    cd /home/ubuntu/backend
-    pm2 start npm -- start
-  args:
-    executable: /bin/bash
-  register: pm2_start_results
-
-- name: Results after unarchiving
-  debug:
-    msg: "{{ after_unarchiving.stdout_lines }}"
-
-- name: Show results npm installs
-  debug:
-    msg: "{{ start_app_results.stdout_lines }}"
-
-- name: Show results after app pm2 starts
-  debug:
-    msg: "{{ pm2_start_results.stdout_lines }}"
-  
+    pm2 stop default
+    sudo pm2 start npm -- start
+    
+  environment:
+    - TYPEORM_CONNECTION: "{{ lookup('env', 'TYPEORM_CONNECTION')}}"  
+    - TYPEORM_ENTITIES: "{{ lookup('env', 'TYPEORM_ENTITIES')}}"
+    - TYPEORM_HOST: "{{ lookup('env', 'TYPEORM_HOST')}}"
+    - TYPEORM_PORT: 5432
+    - TYPEORM_USERNAME: "{{ lookup('env', 'TYPEORM_USERNAME')}}"
+    - TYPEORM_PASSWORD: "{{ lookup('env', 'TYPEORM_PASSWORD')}}"
+    - TYPEORM_DATABASE: "{{ lookup('env', 'TYPEORM_DATABASE')}}"
+    - TYPEORM_MIGRATIONS: "{{ lookup('env', 'TYPEORM_MIGRATIONS')}}"
+    - TYPEORM_MIGRATIONS_DIR: "{{ lookup('env', 'TYPEORM_MIGRATIONS_DIR')}}"
