@@ -228,12 +228,12 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          - key: frontend-build
+          key: frontend-build
       - run:
           name: Install node and npm dependencies
-          command: apk add --update nodejs npm
-      - run:
-          name: Install AWSCLI and Curl
+          command:  apk add --update nodejs npm
+      - run: 
+          name: Install AWS cli and curl
           command: |
             pip install awscli
             apk add --update curl
@@ -244,24 +244,22 @@ jobs:
           name: Get backend url
           command: |
             export BACKEND_IP=$(aws ec2 describe-instances \
-              --filters Name=tag:Name, Values=backend-{CIRCLE_WORKFLOW_ID:0:7} \
+              --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --output text)
             export API_URL="http://${BACKEND_IP}:3030"
-            echo "API_URL = ${API_URL}"
             echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
+            echo "${API_URL}"
             cat frontend/.env
       - run:
           name: Deploy frontend objects
           command: |
-            cd frontend 
-            ls -a 
-            cat .env 
+            cd frontend
             npm install
             npm run build
-            tar -czvf artifact-"{CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
-            aws s3 cp dist s3://udapeople-{CIRCLE_WORKFLOW_ID:0:7} --recursive
-
+            tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
+            aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
+            
       - destroy-environment
       - revert-migrations
 
