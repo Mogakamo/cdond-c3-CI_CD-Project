@@ -229,9 +229,9 @@ jobs:
       - checkout
       - restore_cache:
           - key: frontend-build
-      - run: 
+      - run:
           name: Install node and npm dependencies
-          command: apk add --update nodejs npm 
+          command: apk add --update nodejs npm
       - run:
           name: Install AWSCLI and Curl
           command: |
