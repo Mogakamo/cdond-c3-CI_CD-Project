@@ -227,7 +227,8 @@ jobs:
       - image: python:3.10.5-alpine3.16
     steps:
       - checkout
-      - restore_cache: frontend-build
+      - restore_cache:
+          - key: frontend-build
       - run: 
           name: Install node and npm dependencies
           command: apk add --update nodejs npm 
