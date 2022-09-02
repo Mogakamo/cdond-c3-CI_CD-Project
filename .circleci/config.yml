@@ -199,7 +199,7 @@ jobs:
             apk add --update --no-cache ansible tar gzip aws-cli openssh
 
       - run:
-           name: Configure server
+          name: Configure server
           command: |
             pwd
             cd .circleci/ansible
@@ -238,7 +238,7 @@ jobs:
             fi
 
       - destroy-environment:
-            workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   deploy-frontend:
     docker:
@@ -255,8 +255,8 @@ jobs:
             apk add --update --no-cache nodejs
             apk add --update --no-cache npm
             apk add --update --no-cache aws-cli
-            apk add --update --no-cache curl 
-            
+            apk add --update --no-cache curl
+
       - run:
           name: Get backend url
           command: |
@@ -281,7 +281,7 @@ jobs:
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
       - revert-migrations:
-            workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   deploy-backend:
     docker:
@@ -314,7 +314,7 @@ jobs:
             echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> ".env"
             echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> ".env"
             echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> ".env"
-            
+
             pwd
             ls -al
             npm install
@@ -329,13 +329,10 @@ jobs:
             cat inventory.txt
             ansible-playbook -i inventory.txt deploy-backend.yml
 
-
-      
-
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
       - revert-migrations:
-            workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   # smoke-test:
   #   docker:
