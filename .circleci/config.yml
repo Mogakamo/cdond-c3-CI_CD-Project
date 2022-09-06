@@ -216,34 +216,35 @@ jobs:
 
   run-migrations:
     docker:
-      - image: circleci/node:13.8.0
+      - image: cimg/node:18.4.0
     steps:
       - checkout
+      - attach_workspace:
+          at: ~/
       - restore_cache:
-          keys: [backend-build]
-
+          keys: [backend]
       - run:
           name: Run migrations
           command: |
             cd backend
-            sudo npm install -g npm
-            npm run migrations > migrations_dump.txt
-            cat migrations_dump.txt
-
+            # npm install            
+            # Run and save the migration output
+            npm run migrations > ~/project/migrations_dump.txt
+            cat ~/project/migrations_dump.txt
       - run:
-          name: Send migration results to kvdb
+          name: Send migration results to memstash
           command: |
-            if grep -q "has been executed successfully." backend/migrations_dump.txt
+            if grep -q "has been executed successfully." ~/project/migrations_dump.txt
             then
-              # kvdb.io
-              curl https://kvdb.io/Cn38wMVvuo7cQwF4Mp1unv/SUCCESS  -d 1
-            else
-              curl https://kvdb.io/Cn38wMVvuo7cQwF4Mp1unv/SUCCESS  -d 0
-            fi
+              curl " https://kvdb.io/Cn38wMVvuo7cQwF4Mp1unv/migration_${CIRCLE_WORKFLOW_ID:0:7}" -s -d '1'
+            fi 
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - project/migrations_dump.txt
+      - destroy-environment
 
-      - destroy-environment:
-          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
-
+  
   deploy-frontend:
     docker:
       - image: python:3.10-alpine3.16
