@@ -359,17 +359,15 @@ jobs:
       - run:
           name: Backend smoke test
           command: |
-            tail -1 .circleci/ansible/inventory.txt
-            export BACKEND_IP=$(tail -1 .circleci/ansible/inventory.txt)
-            export BACKEND_URL="http://${BACKEND_IP}:3030/api/status"
-            echo ${BACKEND_URL}
-            # if curl "http://${BACKEND_IP}:3030/api/status" | grep "ok"
-            if curl ${BACKEND_URL} | grep "ok"
-            then
-                return 0
-            else
-                return 1
-            fi
+            # Fetch and prepare the BACKEND_IP env var
+             export API_URL="http://${BACKEND_IP}:3030"
+             echo "${API_URL}"
+             if curl "${API_URL}/api/status" | grep "ok"
+             then
+                 return 0
+             else
+                 return 1
+             fi
 
       - run:
           name: Frontend smoke test.
