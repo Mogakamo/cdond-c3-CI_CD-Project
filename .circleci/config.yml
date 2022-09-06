@@ -143,15 +143,14 @@ jobs:
             npm install
             npm audit fix --audit-level=critical
 
-   
   deploy-infrastructure:
-    docker: 
+    docker:
       - image: amazon/aws-cli
       # Docker image here that supports AWS CLI
     steps:
       # Checkout code from git
       - checkout
-      - run:  yum install tar gzip -y
+      - run: yum install tar gzip -y
       - run:
           name: Ensure back-end infrastructure exists
           command: |
@@ -237,14 +236,14 @@ jobs:
             if grep -q "has been executed successfully." ~/project/migrations_dump.txt
             then
               curl " https://kvdb.io/Cn38wMVvuo7cQwF4Mp1unv/migration_${CIRCLE_WORKFLOW_ID:0:7}" -s -d '1'
-            fi 
+            fi
       - persist_to_workspace:
           root: ~/
           paths:
             - project/migrations_dump.txt
-      - destroy-environment
+      - destroy-environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
-  
   deploy-frontend:
     docker:
       - image: python:3.10-alpine3.16
