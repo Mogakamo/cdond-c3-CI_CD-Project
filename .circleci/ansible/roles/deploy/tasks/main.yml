@@ -1,19 +1,51 @@
 ---
+- name: "update apt packages."
+  become: true
+  apt:
+    update_cache: yes
 
-- name: Creates directory
+- name: "upgrade packages"
+  become: true
+  apt:
+    upgrade: yes
+
+- name: remove unneeded deps
+  become: true
+  apt:
+    autoremove: yes
+
+- name: install deps
+  become: true
+  apt:
+    name: ["nodejs", "npm"]
+    state: latest
+    update_cache: yes
+
+- name: install pm2
+  become: true
+  npm:
+    name: pm2
+    global: yes
+    state: latest
+    production: yes
+
+- name: Create backend app directory
   file:
-    path: ~/web
+    path: ~/backend_app_dir
     state: directory
 
-- name: Extract artifact.tar.gz into /web/
-  unarchive:
-    src: "~/project/build/artifact.tar.gz"
-    dest: ~/web/
+- name: extract artifact
+  become: true
+  copy:
+    src: ~/project/artifact.tar.gz
+    dest: /home/ubuntu/backend_app_dir/artifact.tar.gz
 
-- name: Executing node
+- name: start app
+  become: true
   shell: |
-    cd ~/web/
+    cd /home/ubuntu/backend_app_dir/artifact.tar.gz
+    tar xzvf artifact.tar.gz
     npm install
-    npm run migrations
-    pm2 stop default
-    pm2 start npm -- start
+    npm run build
+    pm2 stop all
+    sudo pm2 start npm -- start
