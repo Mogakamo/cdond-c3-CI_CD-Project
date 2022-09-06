@@ -382,11 +382,11 @@ jobs:
   #             return 1
   #           fi
 
-      # Here's where you will add some code to rollback on failure
-      # - destroy-environment:
-      #     workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
-      # - revert-migrations:
-      #     workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+  # Here's where you will add some code to rollback on failure
+  # - destroy-environment:
+  #     workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+  # - revert-migrations:
+  #     workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   cloudfront-update:
     docker:
@@ -469,9 +469,9 @@ workflows:
           requires: [run-migrations]
       - deploy-backend:
           requires: [run-migrations]
-      - smoke-test:
-          requires: [deploy-backend, deploy-frontend]
-      # - cloudfront-update:
-      #     requires: [smoke-test]
+      # - smoke-test:
+      #     requires: [deploy-backend, deploy-frontend]
+      - cloudfront-update:
+          requires: [deploy-frontend]
       # - cleanup:
       #     requires: [cloudfront-update]
