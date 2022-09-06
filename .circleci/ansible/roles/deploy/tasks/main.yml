@@ -1,54 +1,19 @@
 ---
-- name: "update apt packages."
-  become: yes
-  apt:
-    update_cache: yes
 
-- name: "upgrade packages"
-  become: yes
-  apt:
-    upgrade: yes
+- name: Creates directory
+  file:
+    path: ~/web
+    state: directory
 
-- name: remove unneeded deps
-  become: yes
-  apt:
-    autoremove: yes
-
-- name: install deps
-  become: yes
-  apt:
-    name: ['nodejs', 'npm']
-    state: latest
-    update_cache: yes
-
-- name: install pm2
-  become: yes
-  npm:
-    name: pm2
-    global: yes
-    state: latest
-    production: yes
-
-- name: extract artifact
-  become: yes
+- name: Extract artifact.tar.gz into /web/
   unarchive:
-    src: files/artifact.tar.gz
-    dest: .
+    src: "~/project/build/artifact.tar.gz"
+    dest: ~/web/
 
-- name: start app
-  become: yes
+- name: Executing node
   shell: |
+    cd ~/web/
     npm install
+    npm run migrations
     pm2 stop default
-    sudo pm2 start npm -- start
-    
-  environment:
-    - TYPEORM_CONNECTION: "{{ lookup('env', 'TYPEORM_CONNECTION')}}"  
-    - TYPEORM_ENTITIES: "{{ lookup('env', 'TYPEORM_ENTITIES')}}"
-    - TYPEORM_HOST: "{{ lookup('env', 'TYPEORM_HOST')}}"
-    - TYPEORM_PORT: 5432
-    - TYPEORM_USERNAME: "{{ lookup('env', 'TYPEORM_USERNAME')}}"
-    - TYPEORM_PASSWORD: "{{ lookup('env', 'TYPEORM_PASSWORD')}}"
-    - TYPEORM_DATABASE: "{{ lookup('env', 'TYPEORM_DATABASE')}}"
-    - TYPEORM_MIGRATIONS: "{{ lookup('env', 'TYPEORM_MIGRATIONS')}}"
-    - TYPEORM_MIGRATIONS_DIR: "{{ lookup('env', 'TYPEORM_MIGRATIONS_DIR')}}"
+    pm2 start npm -- start
