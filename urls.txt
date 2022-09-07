@@ -1,2 +1,2 @@
 URL01: https://github.com/Mogakamo/cdond-c3-CI_CD-Project.git
-URL02: http://udapeople-0b1c287.s3-website-us-east-1.amazonaws.com/ 
+URL02: http://udapeople-b3b1858.s3-website-us-east-1.amazonaws.com/
