@@ -33,7 +33,7 @@ commands:
           name: Revert migrations
           when: on_fail
           command: |
-            SUCCESS = $(curl --insecure https://kvdb.io/Cn38wMVvuo7cQwF4Mp1unv/migration_${CIRCLE_WORKFLOW_ID:0:7})
+            SUCCESS = $(curl --insecure https://kvdb.io/2Qih2QreZMnptK533RDSDW/migration_${CIRCLE_WORKFLOW_ID:0:7})
             if(( $SUCCESS==1 )); 
             then
              cd ~/project/backend
@@ -227,32 +227,33 @@ jobs:
 
   run-migrations:
     docker:
-      - image: cimg/node:18.4.0
+      # Docker image here that supports NodeJS
+      - image: circleci/node:13.8.0
     steps:
+      # Checkout code from git
       - checkout
-      - attach_workspace:
-          at: ~/
       - restore_cache:
-          keys: [backend]
+          keys: [backend-build]
+
+      # - run:
+      #     name: Install dependencies
+      #     command: |
+      #       apk add --update --no-cache nodejs npm aws-cli
+
       - run:
           name: Run migrations
           command: |
             cd backend
-            # npm install            
-            # Run and save the migration output
-            npm run migrations > ~/project/migrations_dump.txt
-            cat ~/project/migrations_dump.txt
+            sudo npm install -g npm
+            npm run migrations > migrations_dump.txt
+            cat migrations_dump.txt
       - run:
-          name: Send migration results to memstash
+          name: Send migration results to kvdb.io
           command: |
-            if grep -q "has been executed successfully." ~/project/migrations_dump.txt
+            if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
             then
-              curl " https://kvdb.io/Cn38wMVvuo7cQwF4Mp1unv/migration_${CIRCLE_WORKFLOW_ID:0:7}" -s -d '1'
+                curl --insecure https://kvdb.io/2Qih2QreZMnptK533RDSDW/migration_${CIRCLE_WORKFLOW_ID:0:7} -d '1'
             fi
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - project/migrations_dump.txt
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
